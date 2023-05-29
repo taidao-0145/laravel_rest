@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 
 class StudentController extends Controller
 {
-    public function index()
+    public function index(): \Illuminate\Http\JsonResponse
     {
         $student = Student::all();
         if ($student->count() > 0) {
@@ -27,7 +27,7 @@ class StudentController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:191',
@@ -64,7 +64,7 @@ class StudentController extends Controller
 
     }
 
-    public function show($id)
+    public function show(int $id): \Illuminate\Http\JsonResponse
     {
         $student = Student::find($id);
         if ($student) {
