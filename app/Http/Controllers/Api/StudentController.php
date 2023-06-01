@@ -3,22 +3,28 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StudentRequest;
 use App\Models\Student;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class StudentController extends Controller
 {
-    public function index()
+
+    public function list($id): \Illuminate\Http\JsonResponse
     {
-        $student = Student::all();
-        if ($student->count() > 0) {
+        $student =  DB::select("SELECT * FROM students WHERE id > :id",[
+            'id' => $id,
+        ]);
+        if ($student) {
             $data = [
                 'status' => 200,
                 'students' => $student
             ];
             return response()->json($data, 200);
-        } else {
+        }
+        else {
             $data = [
                 'status' => 400,
                 'mess' => "not student"
@@ -27,14 +33,48 @@ class StudentController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function find($id){
+        $student = DB::table("students")->where("id",$id)->select('name')->get();
+        if ($student) {
+            $data = [
+                'status' => 200,
+                'students' => $student
+            ];
+            return response()->json($data, 200);
+        }
+        else {
+            $data = [
+                'status' => 400,
+                'mess' => "not student"
+            ];
+            return response()->json($data, 400);
+        }
+    }
+    public function index(): \Illuminate\Http\JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:191',
-            'course' => 'required|string|max:191',
-            'email' => 'required|email|max:191',
-            'phone' => 'required|digits:10',
-        ]);
+        $student = Student::all();
+
+        if ($student->count() > 0) {
+            $data = [
+                'status' => 200,
+                'students' => $student
+            ];
+
+            return response()->json($data, 200);
+        } else {
+            $data = [
+                'status' => 400,
+                'mess' => "not student"
+            ];
+
+            return response()->json($data, 400);
+        }
+    }
+
+    public function store(StudentRequest $request): \Illuminate\Http\JsonResponse
+    {
+        $validator = $request->validated();
+
         if ($validator->fails()) {
             return response()->json([
                 'status' => 422,
@@ -64,7 +104,7 @@ class StudentController extends Controller
 
     }
 
-    public function show($id)
+    public function show($id): \Illuminate\Http\JsonResponse
     {
         $student = Student::find($id);
         if ($student) {
@@ -98,7 +138,7 @@ class StudentController extends Controller
 
     }
 
-    public function update(Request $request, int $id)
+    public function update(Request $request, int $id): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:191',
@@ -134,7 +174,7 @@ class StudentController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy($id): \Illuminate\Http\JsonResponse
     {
         $student = Student::find($id);
         if ($student) {
